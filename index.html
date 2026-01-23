@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Online Meeting Simulator</title>
+
+  <style>
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --line:#e0e3eb;
+      --text:#1f1f1f;
+      --muted:#5f6368;
+      --accent:#1a73e8;
+      --danger:#d93025;
+      --ok:#188038;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 10px 30px rgba(0,0,0,.10);
+      --radius: 18px;
+      --dark:#202124;
+      --dark2:#2b2c2f;
+      --pillbg:#eef3fd;
+      --pillline:#d7e3fd;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .page{
+      max-width: 1150px;
+      margin: 14px auto 20px;
+      padding: 0 14px;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 900;
+      font-size: 16px;
+    }
+    .logo{
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: #e8f0fe;
+      border: 1px solid #c6dafc;
+      display:grid; place-items:center;
+      color:#1a73e8;
+      font-weight:900;
+    }
+    .pill{
+      font-size:12px;
+      color: var(--muted);
+      background: var(--pillbg);
+      border: 1px solid var(--pillline);
+      border-radius: 999px;
+      padding: 6px 10px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .rightPills{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    }
+
+    .warn{
+      margin: 10px 0 14px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff6d6;
+      border: 1px solid #f0d27a;
+      color:#5a4a12;
+      font-size: 14px;
+    }
+
+    /* Layout containers */
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .prejoin{
+      display:grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 14px;
+      padding: 14px;
+    }
+    @media (max-width: 900px){
+      .prejoin{ grid-template-columns: 1fr; }
+    }
+
+    /* Preview box (camera area) */
+    .preview{
+      border-radius: 16px;
+      background: var(--dark);
+      color: #fff;
+      min-height: 360px;
+      position: relative;
+      overflow:hidden;
+      border: 1px solid #2f3136;
+    }
+    .preview .centerText{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      font-size: 18px;
+      color: #e8eaed;
+      text-align:center;
+      padding: 18px;
+    }
+    .preview .cornerBtn{
+      position:absolute;
+      left:14px;
+      bottom:14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid #3c4043;
+      background: rgba(255,255,255,0.08);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+    }
+    .preview .cornerBtn:hover{ background: rgba(255,255,255,0.12); }
+    .preview .cornerBtn:active{ transform: translateY(1px); }
+
+    .preview .miniDots{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display:grid; place-items:center;
+      color:#cdd0d5;
+      user-select:none;
+    }
+
+    /* Pre-join controls under preview */
+    .preControls{
+      position:absolute;
+      left:0; right:0;
+      bottom:0;
+      padding: 14px 14px 18px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      pointer-events:none;
+    }
+    .roundBtn{
+      pointer-events:auto;
+      width: 46px; height: 46px;
+      border-radius: 999px;
+      border: 1px solid #3c4043;
+      background: rgba(255,255,255,0.10);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      font-size: 16px;
+    }
+    .roundBtn:hover{ background: rgba(255,255,255,0.14); }
+    .roundBtn.off{
+      background: rgba(217,48,37,0.95);
+      border-color: rgba(217,48,37,0.95);
+    }
+
+    /* Right panel (join buttons/info) */
+    .joinPanel{
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+    }
+    .meetingTitle{
+      font-size: 18px;
+      font-weight: 900;
+      margin: 2px 0 6px;
+    }
+    .smallMuted{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .who{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin: 12px 0 10px;
+    }
+    .avatar{
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      background: #e8f0fe;
+      border: 1px solid #c6dafc;
+      display:grid; place-items:center;
+      color:#1a73e8;
+      font-weight:900;
+    }
+    .btnRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin: 12px 0;
+    }
+    .btn{
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 15px;
+      cursor:pointer;
+    }
+    .btnPrimary{
+      background: var(--accent);
+      color: #fff;
+      font-weight: 900;
+    }
+    .btnPrimary:hover{ filter: brightness(0.95); }
+    .btnGhost{
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-weight: 700;
+    }
+    .btnGhost:hover{ background:#f3f6ff; }
+
+    .input{
+      width:100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 15px;
+      outline:none;
+    }
+    .input:focus{
+      border-color:#b6c9fb;
+      box-shadow:0 0 0 3px rgba(26,115,232,.12);
+    }
+
+    /* Meeting screen */
+    .meeting{
+      display:none;
+    }
+    .meetWrap{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap: 12px;
+      padding: 12px;
+    }
+    @media (max-width: 980px){
+      .meetWrap{ grid-template-columns: 1fr; }
+    }
+
+    .stage{
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 520px;
+    }
+    .stageTop{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:#fbfbff;
+    }
+    .stageTop .left{
+      display:flex; align-items:center; gap:10px;
+      font-weight:900;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--ok);
+      border: 1px solid #0f6b2c;
+    }
+    .stageTop .right{
+      display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+    }
+
+    .gridTiles{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px;
+      background: #f7f9ff;
+      flex: 1;
+    }
+    @media (max-width: 700px){
+      .gridTiles{ grid-template-columns: 1fr; }
+    }
+
+    .tile{
+      border-radius: 16px;
+      background: var(--dark);
+      color:#fff;
+      border: 1px solid #2f3136;
+      position:relative;
+      min-height: 210px;
+      overflow:hidden;
+    }
+    .tile .name{
+      position:absolute;
+      left:10px; bottom:10px;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      color:#e8eaed;
+    }
+    .tile .status{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#cdd0d5;
+      text-align:center;
+      padding: 14px;
+      font-size: 16px;
+    }
+
+    /* Bottom controls */
+    .meetControls{
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background:#fff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .controlGroup{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .controlBtn{
+      width: 44px; height: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:#fff;
+      display:grid; place-items:center;
+      cursor:pointer;
+      user-select:none;
+      font-size: 16px;
+    }
+    .controlBtn:hover{ background:#f3f6ff; }
+    .controlBtn.off{
+      background: #fde7e9;
+      border-color:#f3c2c2;
+      color: var(--danger);
+      font-weight: 900;
+    }
+    .hangup{
+      background: var(--danger);
+      border-color: var(--danger);
+      color:#fff;
+      width: auto;
+      padding: 0 16px;
+      font-weight: 900;
+    }
+    .hangup:hover{ filter: brightness(0.95); }
+
+    /* Side panel (chat + tips) */
+    .side{
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background:#fff;
+      overflow:hidden;
+      min-height: 520px;
+      display:flex;
+      flex-direction:column;
+    }
+    .sideTop{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background:#fbfbff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-weight:900;
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding: 10px 12px;
+      border-bottom:1px solid var(--line);
+    }
+    .tab{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:#fff;
+      font-size: 13px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      border-color:#b6c9fb;
+      background:#eef3fd;
+      font-weight:900;
+    }
+    .panelBody{
+      padding: 10px 12px;
+      flex: 1;
+      overflow:auto;
+    }
+    .chatLine{
+      margin: 8px 0;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background:#fff;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .chatLine .who{ margin:0 0 4px; gap:8px; }
+    .chatLine .who span{ font-size: 12px; color: var(--muted); }
+    .chatInputRow{
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      background:#fff;
+    }
+    .sendBtn{
+      border:0;
+      border-radius: 999px;
+      padding: 10px 12px;
+      background: var(--accent);
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .sendBtn:hover{ filter: brightness(0.95); }
+
+    .tipBox{
+      padding: 10px 12px;
+      border: 1px solid #f0d27a;
+      background: #fff6d6;
+      border-radius: 14px;
+      color:#5a4a12;
+      font-size: 14px;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+
+    .hidden{ display:none !important; }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" title="Meeting simulator">💬</div>
+        Online Meeting Simulator
+        <span class="pill">Practice only • Not a real meeting</span>
+      </div>
+      <div class="rightPills">
+        <span class="pill">No sign-in needed</span>
+        <span class="pill">No data stored</span>
+      </div>
+    </div>
+
+    <div class="warn">
+      <strong>🎯 Cyber Wellness Tip:</strong> Only join meetings you know and trust. Use polite words in chat.
+    </div>
+
+    <!-- PRE-JOIN SCREEN -->
+    <div class="card" id="preJoinCard">
+      <div class="prejoin">
+        <div class="preview" aria-label="Camera preview">
+          <div class="centerText" id="previewText">Camera is off</div>
+
+          <div class="cornerBtn" id="effectsBtn"
+               title="Effects: This is just for practice. It does not change the real camera.">
+            ✨
+          </div>
+
+          <div class="miniDots" title="More options (practice only)">⋮</div>
+
+          <div class="preControls" aria-label="Pre-join controls">
+            <div class="roundBtn off" id="micBtn" title="Mic: Turn your microphone on or off.">🎤</div>
+            <div class="roundBtn off" id="camBtn" title="Camera: Turn your camera on or off.">📷</div>
+          </div>
+        </div>
+
+        <div class="joinPanel">
+          <div class="meetingTitle" id="meetingTitle">Class Online Meeting</div>
+          <div class="smallMuted">
+            This is a practice simulator. It will not connect to the internet.
+          </div>
+
+          <div class="who">
+            <div class="avatar" title="You">ME</div>
+            <div>
+              <div style="font-weight:900">You</div>
+              <div class="smallMuted">Ready to join?</div>
+            </div>
+          </div>
+
+          <div class="row" style="border-bottom:none; padding: 6px 0;">
+            <label for="nameInput" style="display:block;margin-bottom:6px;">Your display name (optional)</label>
+            <input class="input" id="nameInput" placeholder="e.g. Aisyah" />
+          </div>
+
+          <div class="btnRow">
+            <button class="btn btnPrimary" id="joinBtn" title="Join: Enter the practice meeting room.">Join now</button>
+            <button class="btn btnGhost" id="presentBtn" title="Present: Practise sharing your screen (fake).">Present</button>
+          </div>
+
+          <div class="smallMuted">
+            <strong>Other options</strong><br>
+            • “Present” is only a practice button.<br>
+            • Mic/Camera buttons only change this simulator.
+          </div>
+
+          <div class="tipBox" style="margin-top:12px;">
+            <strong>Class rule:</strong> Start your meeting with “Good morning” and wait your turn to speak.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEETING SCREEN -->
+    <div class="card meeting" id="meetingCard">
+      <div class="meetWrap">
+        <div class="stage">
+          <div class="stageTop">
+            <div class="left">
+              <span class="dot"></span>
+              <span id="inMeetTitle">Class Online Meeting</span>
+            </div>
+            <div class="right">
+              <span class="pill" id="micStatePill">Mic: Off</span>
+              <span class="pill" id="camStatePill">Camera: Off</span>
+            </div>
+          </div>
+
+          <div class="gridTiles">
+            <div class="tile" id="youTile">
+              <div class="status" id="youStatus">Camera is off</div>
+              <div class="name" id="youNameChip">You</div>
+            </div>
+            <div class="tile">
+              <div class="status">Participant tile (practice)</div>
+              <div class="name">Teacher</div>
+            </div>
+            <div class="tile">
+              <div class="status">Participant tile (practice)</div>
+              <div class="name">Student 1</div>
+            </div>
+            <div class="tile">
+              <div class="status">Participant tile (practice)</div>
+              <div class="name">Student 2</div>
+            </div>
+          </div>
+
+          <div class="meetControls" aria-label="Meeting controls">
+            <div class="controlGroup">
+              <div class="controlBtn off" id="inMicBtn" title="Mic: Turn your microphone on or off.">🎤</div>
+              <div class="controlBtn off" id="inCamBtn" title="Camera: Turn your camera on or off.">📷</div>
+              <div class="controlBtn" id="handBtn" title="Raise hand: Show you want to speak.">✋</div>
+              <div class="controlBtn" id="chatBtn" title="Chat: Open or close the chat panel.">💬</div>
+            </div>
+
+            <div class="controlGroup">
+              <div class="controlBtn hangup" id="leaveBtn" title="Leave: Exit the practice meeting.">Leave</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side" id="sidePanel">
+          <div class="sideTop">
+            <span>Side panel</span>
+            <span class="pill">Practice</span>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active" id="tabChat">Chat</div>
+            <div class="tab" id="tabTips">Tips</div>
+          </div>
+
+          <div class="panelBody" id="chatBody">
+            <div class="chatLine">
+              <div class="who">
+                <div class="avatar" style="width:26px;height:26px;font-size:12px;">T</div>
+                <div><strong>Teacher</strong> <span>• just now</span></div>
+              </div>
+              Please type “Good morning” to practise.
+            </div>
+          </div>
+
+          <div class="panelBody hidden" id="tipsBody">
+            <div class="tipBox">
+              <strong>Meeting manners</strong><br>
+              • Mute when you are not speaking.<br>
+              • Raise your hand before talking.<br>
+              • Use kind words in chat.
+            </div>
+            <div class="tipBox">
+              <strong>Cyber Wellness</strong><br>
+              • Join only trusted meetings.<br>
+              • Do not share passwords or personal info.<br>
+              • Tell an adult if something feels wrong.
+            </div>
+          </div>
+
+          <div class="chatInputRow" id="chatInputRow">
+            <input class="input" id="chatInput" placeholder="Type a chat message..." />
+            <button class="sendBtn" id="sendChatBtn" title="Send message (not saved)">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------- State ----------
+  let micOn = false;
+  let camOn = false;
+  let handUp = false;
+
+  const previewText = document.getElementById("previewText");
+  const micBtn = document.getElementById("micBtn");
+  const camBtn = document.getElementById("camBtn");
+  const presentBtn = document.getElementById("presentBtn");
+  const joinBtn = document.getElementById("joinBtn");
+
+  const preJoinCard = document.getElementById("preJoinCard");
+  const meetingCard = document.getElementById("meetingCard");
+
+  const nameInput = document.getElementById("nameInput");
+  const meetingTitle = document.getElementById("meetingTitle");
+  const inMeetTitle = document.getElementById("inMeetTitle");
+  const youNameChip = document.getElementById("youNameChip");
+  const youStatus = document.getElementById("youStatus");
+  const micStatePill = document.getElementById("micStatePill");
+  const camStatePill = document.getElementById("camStatePill");
+
+  const inMicBtn = document.getElementById("inMicBtn");
+  const inCamBtn = document.getElementById("inCamBtn");
+  const handBtn = document.getElementById("handBtn");
+  const chatBtn = document.getElementById("chatBtn");
+  const leaveBtn = document.getElementById("leaveBtn");
+
+  const sidePanel = document.getElementById("sidePanel");
+  const tabChat = document.getElementById("tabChat");
+  const tabTips = document.getElementById("tabTips");
+  const chatBody = document.getElementById("chatBody");
+  const tipsBody = document.getElementById("tipsBody");
+  const chatInputRow = document.getElementById("chatInputRow");
+  const chatInput = document.getElementById("chatInput");
+  const sendChatBtn = document.getElementById("sendChatBtn");
+
+  function syncButtons(){
+    // Pre-join buttons
+    micBtn.classList.toggle("off", !micOn);
+    camBtn.classList.toggle("off", !camOn);
+
+    // In-meeting buttons
+    inMicBtn.classList.toggle("off", !micOn);
+    inCamBtn.classList.toggle("off", !camOn);
+
+    // Pills
+    micStatePill.textContent = `Mic: ${micOn ? "On" : "Off"}`;
+    camStatePill.textContent = `Camera: ${camOn ? "On" : "Off"}`;
+
+    // Preview + tile text
+    previewText.textContent = camOn ? "Camera is on (practice)" : "Camera is off";
+    youStatus.textContent = camOn ? "Camera is on (practice)" : "Camera is off";
+
+    // Hand
+    handBtn.style.borderColor = handUp ? "#b6c9fb" : "var(--line)";
+    handBtn.style.background = handUp ? "#eef3fd" : "#fff";
+    handBtn.style.fontWeight = handUp ? "900" : "normal";
+    handBtn.title = handUp ? "Lower hand" : "Raise hand: Show you want to speak.";
+  }
+
+  function toggleMic(){ micOn = !micOn; syncButtons(); }
+  function toggleCam(){ camOn = !camOn; syncButtons(); }
+
+  micBtn.addEventListener("click", toggleMic);
+  camBtn.addEventListener("click", toggleCam);
+  inMicBtn.addEventListener("click", toggleMic);
+  inCamBtn.addEventListener("click", toggleCam);
+
+  presentBtn.addEventListener("click", () => {
+    alert("Present (practice): This would share your screen in a real meeting.");
+  });
+
+  document.getElementById("effectsBtn").addEventListener("click", () => {
+    alert("Effects (practice): In a real app, you could change your background.");
+  });
+
+  // Join
+  joinBtn.addEventListener("click", () => {
+    const displayName = (nameInput.value || "").trim();
+    const name = displayName.length ? displayName : "You";
+    youNameChip.textContent = name;
+
+    // Meeting title can be changed later if you want. Keeping it simple.
+    inMeetTitle.textContent = meetingTitle.textContent;
+
+    preJoinCard.style.display = "none";
+    meetingCard.style.display = "block";
+    syncButtons();
+  });
+
+  // Leave
+  leaveBtn.addEventListener("click", () => {
+    if(!confirm("Leave the practice meeting?")) return;
+
+    // Reset meeting view
+    handUp = false;
+
+    // Keep mic/cam state as-is OR reset? We'll reset to off for classroom safety.
+    micOn = false;
+    camOn = false;
+
+    // Clear chat input
+    chatInput.value = "";
+
+    meetingCard.style.display = "none";
+    preJoinCard.style.display = "block";
+    syncButtons();
+  });
+
+  // Hand raise
+  handBtn.addEventListener("click", () => {
+    handUp = !handUp;
+    syncButtons();
+  });
+
+  // Chat panel toggle (on small screens you might want this)
+  let chatOpen = true;
+  chatBtn.addEventListener("click", () => {
+    chatOpen = !chatOpen;
+    sidePanel.style.display = chatOpen ? "flex" : "none";
+  });
+
+  // Tabs
+  function setTab(tab){
+    const isChat = tab === "chat";
+    tabChat.classList.toggle("active", isChat);
+    tabTips.classList.toggle("active", !isChat);
+    chatBody.classList.toggle("hidden", !isChat);
+    tipsBody.classList.toggle("hidden", isChat);
+    chatInputRow.classList.toggle("hidden", !isChat);
+  }
+  tabChat.addEventListener("click", () => setTab("chat"));
+  tabTips.addEventListener("click", () => setTab("tips"));
+
+  // Chat send (local only)
+  function addChatMessage(who, text){
+    const wrap = document.createElement("div");
+    wrap.className = "chatLine";
+    const initials = who.trim().slice(0,1).toUpperCase() || "U";
+
+    wrap.innerHTML = `
+      <div class="who">
+        <div class="avatar" style="width:26px;height:26px;font-size:12px;">${initials}</div>
+        <div><strong>${escapeHtml(who)}</strong> <span>• just now</span></div>
+      </div>
+      ${escapeHtml(text)}
+    `;
+    chatBody.appendChild(wrap);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function escapeHtml(s){
+    return (s || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function sendChat(){
+    const text = (chatInput.value || "").trim();
+    if(!text) return;
+    const name = (youNameChip.textContent || "You").trim();
+    addChatMessage(name, text);
+    chatInput.value = "";
+    chatInput.focus();
+  }
+  sendChatBtn.addEventListener("click", sendChat);
+  chatInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      sendChat();
+    }
+  });
+
+  // init
+  syncButtons();
+  setTab("chat");
+</script>
+</body>
+</html>
