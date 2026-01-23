@@ -10,7 +10,7 @@
 
   gtag('config', 'G-YD32FWDSHP');
 </script>
-  <meta charset="utf-8" />
+    <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Online Meeting Simulator</title>
 
@@ -280,6 +280,7 @@
       padding: 12px;
       padding-bottom: 92px; /* space for bottom bar */
       position: relative;
+      align-items: start; /* prevents stretching weirdly */
     }
     @media (max-width: 980px){
       .meetWrap{ grid-template-columns: 1fr; padding-bottom: 110px; }
@@ -292,8 +293,10 @@
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      min-height: 520px;
+      height: 560px;          /* FIX: stop growing */
+      max-height: 560px;      /* FIX: stop growing */
     }
+
     .stageTop{
       padding: 10px 12px;
       border-bottom: 1px solid var(--line);
@@ -303,6 +306,7 @@
       background:#fbfbff;
       gap:10px;
       flex-wrap:wrap;
+      flex: 0 0 auto;
     }
     .stageTop .left{
       display:flex; align-items:center; gap:10px;
@@ -321,7 +325,8 @@
       gap: 10px;
       padding: 12px;
       background: #f7f9ff;
-      flex: 1;
+      flex: 1 1 auto;
+      overflow: hidden; /* FIX: stable */
     }
     @media (max-width: 700px){
       .gridTiles{ grid-template-columns: 1fr; }
@@ -333,9 +338,16 @@
       color:#fff;
       border: 1px solid #2f3136;
       position:relative;
-      min-height: 320px;
       overflow:hidden;
+
+      /* FIX: lock tile height so it doesn't lengthen while typing */
+      height: 320px;
     }
+
+    @media (max-width: 700px){
+      .tile{ height: 280px; }
+    }
+
     .tile .name{
       position:absolute;
       left:10px; bottom:10px;
@@ -346,7 +358,14 @@
       font-size: 13px;
       color:#e8eaed;
       z-index: 3;
+
+      /* FIX: stop wrapping (which can cause layout reflow) */
+      max-width: calc(100% - 20px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
     .tile .status{
       position:absolute;
       inset:0;
@@ -358,6 +377,7 @@
       font-size: 16px;
       z-index: 2;
     }
+
     .tile video{
       position:absolute;
       inset:0;
@@ -369,6 +389,18 @@
     }
     .tile.videoOn video{ display:block; }
     .tile.videoOn .status{ display:none; }
+
+    /* Host emoji */
+    .hostEmoji{
+      font-size: 64px;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .hostLabel{
+      font-weight: 900;
+      color: #e8eaed;
+      font-size: 16px;
+    }
 
     /* Pin button on host tile */
     .pinBtn{
@@ -393,13 +425,17 @@
       background: rgba(26,115,232,0.25);
     }
 
-    /* Pinned layout: host bigger, you smaller */
+    /* Pinned layout: host bigger, you smaller (fixed heights) */
     .gridTiles.pinned{
       grid-template-columns: 1fr;
       grid-auto-rows: auto;
     }
-    .gridTiles.pinned #hostTile{ min-height: 460px; order: 1; }
-    .gridTiles.pinned #youTile{ min-height: 180px; order: 2; }
+    .gridTiles.pinned #hostTile{ height: 420px; order: 1; }
+    .gridTiles.pinned #youTile{ height: 120px; order: 2; }
+    @media (max-width:700px){
+      .gridTiles.pinned #hostTile{ height: 360px; }
+      .gridTiles.pinned #youTile{ height: 140px; }
+    }
 
     /* Right panel: In-call messages */
     .side{
@@ -407,7 +443,8 @@
       border: 1px solid var(--line);
       background:#fff;
       overflow:hidden;
-      min-height: 520px;
+      height: 560px;          /* match stage height */
+      max-height: 560px;
       display:flex;
       flex-direction:column;
     }
@@ -420,10 +457,11 @@
       align-items:center;
       font-weight:900;
       gap:10px;
+      flex: 0 0 auto;
     }
     .panelBody{
       padding: 10px 12px;
-      flex: 1;
+      flex: 1 1 auto;
       overflow:auto;
     }
     .chatLine{
@@ -449,6 +487,7 @@
       gap:10px;
       align-items:center;
       background:#fff;
+      flex: 0 0 auto;
     }
     .sendBtn{
       border:0;
@@ -563,7 +602,7 @@
       <div class="brand">
         <div class="logo" title="Meeting simulator">💬</div>
         Online Meeting Simulator
-        <span class="pill">Practice only • Not a real meeting</span>
+        <span class="pill">Practice only</span>
       </div>
       <div class="rightPills">
         <span class="pill">No sign-in needed</span>
@@ -572,7 +611,7 @@
     </div>
 
     <div class="warn">
-      <strong>🎯 Cyber Wellness Tip:</strong> Only join meetings you know and trust.
+      <strong>🎯 Cyber Wellness Tip:</strong> Ask a teacher or parent if you are unsure about an online meeting.
     </div>
 
     <!-- PRE-JOIN -->
@@ -647,7 +686,10 @@
             <!-- HOST -->
             <div class="tile" id="hostTile">
               <div class="pinBtn" id="pinHostBtn" title="Pin host: Make the host bigger on your screen.">📌</div>
-              <div class="status">Host (practice)</div>
+              <div class="status">
+                <div class="hostEmoji">🧑🏼‍🏫</div>
+                <div class="hostLabel">Host (practice)</div>
+              </div>
               <div class="name">Host</div>
             </div>
           </div>
@@ -657,8 +699,7 @@
         <div class="side" id="sidePanel">
           <div class="sideTop">
             <span>In-call messages</span>
-            <span class="pill">Practice</span>
-          </div>
+                      </div>
 
           <div class="panelBody" id="chatBody">
             <div class="chatLine">
@@ -688,7 +729,6 @@
             </div>
 
             <div class="barBtn" id="presentBtn" title="Share screen: Practice button (no real sharing).">
-              <!-- monitor + arrow icon -->
               <svg class="presentIcon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="12" rx="2"></rect>
                 <path d="M12 16v4"></path>
@@ -812,20 +852,14 @@
   const emojiBtn = document.getElementById("emojiBtn");
   const emojiMenu = document.getElementById("emojiMenu");
 
-  function hideEmojiMenu(){
-    emojiMenu.style.display = "none";
-  }
-  function openEmojiMenu(anchorEl){
-    const r = anchorEl.getBoundingClientRect();
-    emojiMenu.style.left = Math.round(r.left) + "px";
-    emojiMenu.style.top  = Math.round(r.top - 10 - emojiMenu.offsetHeight) + "px";
+  function hideEmojiMenu(){ emojiMenu.style.display = "none"; }
 
-    // If menu hasn't been measured yet, place below then correct next tick
+  function openEmojiMenu(anchorEl){
     emojiMenu.style.display = "block";
     requestAnimationFrame(() => {
-      const rr = anchorEl.getBoundingClientRect();
-      emojiMenu.style.left = Math.round(rr.left) + "px";
-      emojiMenu.style.top  = Math.round(rr.top - 10 - emojiMenu.offsetHeight) + "px";
+      const r = anchorEl.getBoundingClientRect();
+      emojiMenu.style.left = Math.round(r.left) + "px";
+      emojiMenu.style.top  = Math.round(r.top - 10 - emojiMenu.offsetHeight) + "px";
     });
   }
 
@@ -951,8 +985,6 @@
   // Join
   joinBtn.addEventListener("click", () => {
     const displayName = (nameInput.value || "").trim();
-
-    // show: You (3A Sarah)
     const chipText = displayName.length ? `You (${displayName})` : "You";
     youNameChip.textContent = chipText;
 
@@ -995,104 +1027,4 @@
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
       .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function addChatMessage(who, text){
-    const wrap = document.createElement("div");
-    wrap.className = "chatLine";
-    const initials = who.trim().slice(0,1).toUpperCase() || "U";
-    wrap.innerHTML = `
-      <div class="who">
-        <div class="avatar" style="width:26px;height:26px;font-size:12px;">${initials}</div>
-        <div><strong>${escapeHtml(who)}</strong> <span>• just now</span></div>
-      </div>
-      ${escapeHtml(text)}
-    `;
-    chatBody.appendChild(wrap);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-
-  function addSystemMessage(text, isStern=false){
-    const wrap = document.createElement("div");
-    wrap.className = "chatLine";
-    wrap.innerHTML = `
-      <div class="who">
-        <div class="avatar" style="width:26px;height:26px;font-size:12px;background:${isStern ? "#fce8e6" : "#fff6d6"};border-color:${isStern ? "#f28b82" : "#f0d27a"};color:${isStern ? "#a50e0e" : "#5a4a12"};">!</div>
-        <div><strong>${isStern ? "Warning" : "Reminder"}</strong> <span>• just now</span></div>
-      </div>
-      ${escapeHtml(text)}
-    `;
-    chatBody.appendChild(wrap);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-
-  function containsUnkindWords(text){
-    return UNKIND_PATTERNS.some(rx => rx.test(text));
-  }
-
-  function handleUnkindBehaviour(){
-    unkindCount += 1;
-
-    if(unkindCount === 1){
-      showToast("Reminder: Use kind words.");
-      addSystemMessage("Please use kind words when engaging in conversations.");
-      return;
-    }
-
-    if(unkindCount === 2){
-      showToast("Warning: Be respectful.");
-      addSystemMessage("⚠️ Unkind words are not allowed. Please be respectful.", true);
-      return;
-    }
-
-    // 3rd time: block sending for 10 seconds
-    chatBlockedUntil = Date.now() + 10000;
-    showToast("Chat paused for 10 seconds.");
-    addSystemMessage("Chat is paused for 10 seconds. Please calm down and use respectful words.", true);
-  }
-
-  function sendChat(){
-    const now = Date.now();
-    if(now < chatBlockedUntil){
-      const secs = Math.ceil((chatBlockedUntil - now) / 1000);
-      showToast(`Please wait ${secs}s before sending.`);
-      return;
-    }
-
-    const text = (chatInput.value || "").trim();
-    if(!text) return;
-
-    // Kindness check
-    if(containsUnkindWords(text)){
-      chatInput.value = "";
-      handleUnkindBehaviour();
-      return;
-    }
-
-    const who = (youNameChip.textContent || "You").trim();
-    addChatMessage(who, text);
-    chatInput.value = "";
-    chatInput.focus();
-  }
-
-  sendChatBtn.addEventListener("click", sendChat);
-  chatInput.addEventListener("keydown", (e) => {
-    if(e.key === "Enter"){
-      e.preventDefault();
-      sendChat();
-    }
-  });
-
-  // Placeholder buttons (practice only)
-  document.getElementById("presentBtn").addEventListener("click", () => showToast("Share screen is practice only"));
-  document.getElementById("ccBtn").addEventListener("click", () => showToast("Captions is practice only"));
-  document.getElementById("btnMoreRight").addEventListener("click", () => showToast("More options (not available for this practice)"));
-
-  // init
-  syncUI();
-  setVideoOn(false);
-</script>
-</body>
-</html>
+      .replaceAll('"',"&quot;
