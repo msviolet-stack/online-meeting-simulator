@@ -48,6 +48,7 @@
       gap:10px;
       font-weight: 900;
       font-size: 16px;
+      flex-wrap:wrap;
     }
     .logo{
       width: 28px; height: 28px;
@@ -82,7 +83,7 @@
       font-size: 14px;
     }
 
-    /* Toast message (mic/cam on/off) */
+    /* Toast */
     .toast{
       position: fixed;
       left: 50%;
@@ -180,7 +181,7 @@
     }
     .roundBtn:hover{ background: rgba(255,255,255,0.14); }
 
-    /* "Off" state: red circle + slash overlay */
+    /* OFF state: red circle + slash */
     .roundBtn.off{
       background: rgba(217,48,37,0.95);
       border-color: rgba(217,48,37,0.95);
@@ -265,12 +266,14 @@
     .meeting{ display:none; }
     .meetWrap{
       display:grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 360px;
       gap: 12px;
       padding: 12px;
+      padding-bottom: 92px; /* space for bottom bar */
+      position: relative;
     }
     @media (max-width: 980px){
-      .meetWrap{ grid-template-columns: 1fr; }
+      .meetWrap{ grid-template-columns: 1fr; padding-bottom: 110px; }
     }
 
     .stage{
@@ -289,6 +292,8 @@
       justify-content:space-between;
       align-items:center;
       background:#fbfbff;
+      gap:10px;
+      flex-wrap:wrap;
     }
     .stageTop .left{
       display:flex; align-items:center; gap:10px;
@@ -300,6 +305,7 @@
       border: 1px solid #0f6b2c;
     }
 
+    /* ONLY 2 tiles */
     .gridTiles{
       display:grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -311,13 +317,14 @@
     @media (max-width: 700px){
       .gridTiles{ grid-template-columns: 1fr; }
     }
+
     .tile{
       border-radius: 16px;
       background: var(--dark);
       color:#fff;
       border: 1px solid #2f3136;
       position:relative;
-      min-height: 210px;
+      min-height: 320px;
       overflow:hidden;
     }
     .tile .name{
@@ -354,51 +361,7 @@
     .tile.videoOn video{ display:block; }
     .tile.videoOn .status{ display:none; }
 
-    .meetControls{
-      padding: 12px;
-      border-top: 1px solid var(--line);
-      background:#fff;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .controlGroup{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
-    .controlBtn{
-      width: 44px; height: 44px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background:#fff;
-      display:grid; place-items:center;
-      cursor:pointer;
-      user-select:none;
-      font-size: 16px;
-      position: relative;
-    }
-    .controlBtn:hover{ background:#f3f6ff; }
-    .controlBtn.off{
-      background: #fde7e9;
-      border-color:#f3c2c2;
-      color: var(--danger);
-      font-weight: 900;
-    }
-    .controlBtn.off .slash{ display:block; background: var(--danger); }
-    .controlBtn:not(.off) .slash{ display:none; }
-
-    .hangup{
-      background: var(--danger);
-      border-color: var(--danger);
-      color:#fff;
-      width: auto;
-      padding: 0 16px;
-      font-weight: 900;
-    }
-    .hangup:hover{ filter: brightness(0.95); }
-
-    /* Side panel */
+    /* Right panel: In-call messages */
     .side{
       border-radius: 16px;
       border: 1px solid var(--line);
@@ -416,26 +379,7 @@
       justify-content:space-between;
       align-items:center;
       font-weight:900;
-    }
-    .tabs{
-      display:flex;
-      gap:8px;
-      padding: 10px 12px;
-      border-bottom:1px solid var(--line);
-    }
-    .tab{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background:#fff;
-      font-size: 13px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .tab.active{
-      border-color:#b6c9fb;
-      background:#eef3fd;
-      font-weight:900;
+      gap:10px;
     }
     .panelBody{
       padding: 10px 12px;
@@ -451,7 +395,7 @@
       font-size: 14px;
       line-height: 1.35;
     }
-    .chatLine .who{ margin:0 0 4px; gap:8px; }
+    .chatLine .who{ margin:0 0 4px; gap:8px; display:flex; align-items:center; }
     .chatLine .who span{ font-size: 12px; color: var(--muted); }
     .chatInputRow{
       padding: 10px 12px;
@@ -471,18 +415,75 @@
       cursor:pointer;
     }
     .sendBtn:hover{ filter: brightness(0.95); }
-
-    .tipBox{
-      padding: 10px 12px;
-      border: 1px solid #f0d27a;
-      background: #fff6d6;
-      border-radius: 14px;
-      color:#5a4a12;
-      font-size: 14px;
-      line-height: 1.35;
-      margin-bottom: 10px;
-    }
     .hidden{ display:none !important; }
+
+    /* Bottom Meet-style bar */
+    .meetBar{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      border-radius: 999px;
+      background: rgba(32,33,36,0.92);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 8px 10px;
+      gap: 10px;
+    }
+    .barGroup{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .barBtn{
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      position: relative;
+      font-size: 18px;
+    }
+    .barBtn:hover{ background: rgba(255,255,255,0.12); }
+    .barBtn.off{
+      background: rgba(217,48,37,0.95);
+      border-color: rgba(217,48,37,0.95);
+    }
+    .barBtn.off .slash{ display:block; }
+    .barBtn:not(.off) .slash{ display:none; }
+
+    .barBtn.moreDots{ font-size: 20px; }
+    .barBtn.hangup{
+      background: var(--danger);
+      border-color: var(--danger);
+      width: 60px;
+      font-size: 18px;
+    }
+    .barSep{
+      width: 1px;
+      height: 34px;
+      background: rgba(255,255,255,0.18);
+      margin: 0 2px;
+      border-radius: 999px;
+    }
+
+    /* Accessibility: make icons consistent */
+    .srOnly{
+      position:absolute;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
   </style>
 </head>
 
@@ -504,7 +505,7 @@
       <strong>🎯 Cyber Wellness Tip:</strong> Only join meetings you know and trust.
     </div>
 
-    <!-- PRE-JOIN SCREEN -->
+    <!-- PRE-JOIN -->
     <div class="card" id="preJoinCard">
       <div class="prejoin">
         <div class="preview" id="previewBox" aria-label="Camera preview">
@@ -513,12 +514,10 @@
 
           <div class="preControls" aria-label="Pre-join controls">
             <div class="roundBtn off" id="micBtn" title="Mic: Turn your microphone on or off.">
-              🎤
-              <span class="slash" aria-hidden="true"></span>
+              🎤 <span class="slash" aria-hidden="true"></span>
             </div>
             <div class="roundBtn off" id="camBtn" title="Camera: Turn your camera on or off.">
-              📷
-              <span class="slash" aria-hidden="true"></span>
+              📷 <span class="slash" aria-hidden="true"></span>
             </div>
           </div>
         </div>
@@ -551,9 +550,10 @@
       </div>
     </div>
 
-    <!-- MEETING SCREEN -->
+    <!-- MEETING -->
     <div class="card meeting" id="meetingCard">
       <div class="meetWrap">
+        <!-- Main stage -->
         <div class="stage">
           <div class="stageTop">
             <div class="left">
@@ -567,82 +567,70 @@
           </div>
 
           <div class="gridTiles">
+            <!-- YOU -->
             <div class="tile" id="youTile">
               <video id="tileVideo" playsinline autoplay muted></video>
               <div class="status" id="youStatus">Camera is off</div>
               <div class="name" id="youNameChip">You</div>
             </div>
-            <div class="tile">
-              <div class="status">Participant tile (practice)</div>
-              <div class="name">Teacher</div>
-            </div>
-            <div class="tile">
-              <div class="status">Participant tile (practice)</div>
-              <div class="name">Student 1</div>
-            </div>
-            <div class="tile">
-              <div class="status">Participant tile (practice)</div>
-              <div class="name">Student 2</div>
-            </div>
-          </div>
 
-          <div class="meetControls" aria-label="Meeting controls">
-            <div class="controlGroup">
-              <div class="controlBtn off" id="inMicBtn" title="Mic: Turn your microphone on or off.">
-                🎤 <span class="slash" aria-hidden="true"></span>
-              </div>
-              <div class="controlBtn off" id="inCamBtn" title="Camera: Turn your camera on or off.">
-                📷 <span class="slash" aria-hidden="true"></span>
-              </div>
-              <div class="controlBtn" id="handBtn" title="Raise hand: Show you want to speak.">✋</div>
-              <div class="controlBtn" id="chatBtn" title="Chat: Open or close the chat panel.">💬</div>
-            </div>
-
-            <div class="controlGroup">
-              <div class="controlBtn hangup" id="leaveBtn" title="Leave: Exit the practice meeting.">Leave</div>
+            <!-- HOST -->
+            <div class="tile" id="hostTile">
+              <div class="status">Host (practice)</div>
+              <div class="name">Host</div>
             </div>
           </div>
         </div>
 
+        <!-- In-call messages -->
         <div class="side" id="sidePanel">
           <div class="sideTop">
-            <span>Side panel</span>
+            <span>In-call messages</span>
             <span class="pill">Practice</span>
-          </div>
-
-          <div class="tabs">
-            <div class="tab active" id="tabChat">Chat</div>
-            <div class="tab" id="tabTips">Tips</div>
           </div>
 
           <div class="panelBody" id="chatBody">
             <div class="chatLine">
               <div class="who">
-                <div class="avatar" style="width:26px;height:26px;font-size:12px;">T</div>
-                <div><strong>Teacher</strong> <span>• just now</span></div>
+                <div class="avatar" style="width:26px;height:26px;font-size:12px;">H</div>
+                <div><strong>Host</strong> <span>• just now</span></div>
               </div>
               Please type “Good morning” to practise.
             </div>
           </div>
 
-          <div class="panelBody hidden" id="tipsBody">
-            <div class="tipBox">
-              <strong>Meeting manners</strong><br>
-              • Mute when you are not speaking.<br>
-              • Raise your hand before talking.<br>
-              • Use kind words in chat.
-            </div>
-            <div class="tipBox">
-              <strong>Cyber Wellness</strong><br>
-              • Join only trusted meetings.<br>
-              • Do not share passwords or personal info.<br>
-              • Tell an adult if something feels wrong.
-            </div>
+          <div class="chatInputRow" id="chatInputRow">
+            <input class="input" id="chatInput" placeholder="Type a message..." />
+            <button class="sendBtn" id="sendChatBtn" title="Send message (not saved)">Send</button>
+          </div>
+        </div>
+
+        <!-- Bottom taskbar -->
+        <div class="meetBar" aria-label="Meeting toolbar">
+          <div class="barGroup">
+            <div class="barBtn" id="btnMoreLeft" title="More options (practice)">…</div>
           </div>
 
-          <div class="chatInputRow" id="chatInputRow">
-            <input class="input" id="chatInput" placeholder="Type a chat message..." />
-            <button class="sendBtn" id="sendChatBtn" title="Send message (not saved)">Send</button>
+          <div class="barGroup">
+            <div class="barBtn off" id="inMicBtn" title="Microphone: Turn on or off">
+              🎤 <span class="slash" aria-hidden="true"></span>
+            </div>
+
+            <div class="barBtn off" id="inCamBtn" title="Camera: Turn on or off">
+              📷 <span class="slash" aria-hidden="true"></span>
+            </div>
+
+            <div class="barBtn" id="presentBtn" title="Present (practice)">🖥️</div>
+
+            <div class="barBtn" id="emojiBtn" title="Emoji (practice)">😊</div>
+
+            <div class="barBtn" id="ccBtn" title="Captions (practice)">CC</div>
+
+            <div class="barBtn" id="handBtn" title="Raise hand">✋</div>
+
+            <div class="barBtn moreDots" id="btnMoreRight" title="More (practice)">⋮</div>
+
+            <div class="barBtn hangup" id="leaveBtn" title="Leave">📞</div>
           </div>
         </div>
       </div>
@@ -658,7 +646,7 @@
   let camOn = false;
   let handUp = false;
 
-  // Camera stream (shared for preview + tile)
+  // Camera stream shared between preview and tile
   let camStream = null;
 
   const toast = document.getElementById("toast");
@@ -670,15 +658,7 @@
     toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
   }
 
-  const previewBox = document.getElementById("previewBox");
-  const previewVideo = document.getElementById("previewVideo");
-  const tileVideo = document.getElementById("tileVideo");
-
-  const previewText = document.getElementById("previewText");
-  const micBtn = document.getElementById("micBtn");
-  const camBtn = document.getElementById("camBtn");
-  const joinBtn = document.getElementById("joinBtn");
-
+  // Elements
   const preJoinCard = document.getElementById("preJoinCard");
   const meetingCard = document.getElementById("meetingCard");
 
@@ -690,25 +670,32 @@
   const micStatePill = document.getElementById("micStatePill");
   const camStatePill = document.getElementById("camStatePill");
 
+  // Pre-join buttons
+  const micBtn = document.getElementById("micBtn");
+  const camBtn = document.getElementById("camBtn");
+  const joinBtn = document.getElementById("joinBtn");
+
+  // Camera boxes
+  const previewBox = document.getElementById("previewBox");
+  const previewVideo = document.getElementById("previewVideo");
+  const tileVideo = document.getElementById("tileVideo");
+  const previewText = document.getElementById("previewText");
+
+  // In-meeting toolbar buttons
   const inMicBtn = document.getElementById("inMicBtn");
   const inCamBtn = document.getElementById("inCamBtn");
   const handBtn = document.getElementById("handBtn");
-  const chatBtn = document.getElementById("chatBtn");
   const leaveBtn = document.getElementById("leaveBtn");
+  const chatBtn = document.getElementById("emojiBtn"); // not used, just placeholder
 
+  // Chat
   const sidePanel = document.getElementById("sidePanel");
-  const tabChat = document.getElementById("tabChat");
-  const tabTips = document.getElementById("tabTips");
   const chatBody = document.getElementById("chatBody");
-  const tipsBody = document.getElementById("tipsBody");
-  const chatInputRow = document.getElementById("chatInputRow");
   const chatInput = document.getElementById("chatInput");
   const sendChatBtn = document.getElementById("sendChatBtn");
 
   function setVideoOn(on){
-    // preview styling
     previewBox.classList.toggle("videoOn", on);
-    // meeting tile styling
     document.getElementById("youTile").classList.toggle("videoOn", on);
 
     previewText.textContent = on ? "" : "Camera is off";
@@ -718,7 +705,6 @@
   async function startCamera(){
     if(camStream) return camStream;
 
-    // Request camera. (Audio not requested here.)
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user" },
       audio: false
@@ -740,56 +726,63 @@
     setVideoOn(false);
   }
 
-  function syncButtons(){
+  function syncUI(){
+    // Pre-join button styles
     micBtn.classList.toggle("off", !micOn);
     camBtn.classList.toggle("off", !camOn);
+
+    // In-meeting button styles
     inMicBtn.classList.toggle("off", !micOn);
     inCamBtn.classList.toggle("off", !camOn);
 
     micStatePill.textContent = `Mic: ${micOn ? "On" : "Off"}`;
     camStatePill.textContent = `Camera: ${camOn ? "On" : "Off"}`;
 
-    handBtn.style.borderColor = handUp ? "#b6c9fb" : "var(--line)";
-    handBtn.style.background = handUp ? "#eef3fd" : "#fff";
-    handBtn.style.fontWeight = handUp ? "900" : "normal";
-    handBtn.title = handUp ? "Lower hand" : "Raise hand: Show you want to speak.";
+    handBtn.style.borderColor = handUp ? "rgba(26,115,232,.7)" : "rgba(255,255,255,0.14)";
+    handBtn.style.background = handUp ? "rgba(26,115,232,0.25)" : "rgba(255,255,255,0.08)";
   }
 
   function toggleMic(){
     micOn = !micOn;
-    syncButtons();
+    syncUI();
     showToast(micOn ? "Microphone is on" : "Microphone is off");
   }
 
   async function toggleCam(){
-    // Turning ON
     if(!camOn){
       try{
         await startCamera();
         camOn = true;
-        syncButtons();
+        syncUI();
         showToast("Camera is on");
       }catch(err){
         camOn = false;
-        syncButtons();
-        // Friendly message if blocked/denied
+        syncUI();
         showToast("Camera permission was not allowed");
         setVideoOn(false);
       }
       return;
     }
 
-    // Turning OFF
     camOn = false;
     stopCamera();
-    syncButtons();
+    syncUI();
     showToast("Camera is off");
   }
 
+  // Wire pre-join
   micBtn.addEventListener("click", toggleMic);
   camBtn.addEventListener("click", toggleCam);
+
+  // Wire in-meeting toolbar
   inMicBtn.addEventListener("click", toggleMic);
   inCamBtn.addEventListener("click", toggleCam);
+
+  handBtn.addEventListener("click", () => {
+    handUp = !handUp;
+    syncUI();
+    showToast(handUp ? "Hand raised" : "Hand lowered");
+  });
 
   // Join
   joinBtn.addEventListener("click", () => {
@@ -801,10 +794,10 @@
 
     preJoinCard.style.display = "none";
     meetingCard.style.display = "block";
-    syncButtons();
+    syncUI();
   });
 
-  // Leave (reset to off for safety + stop camera)
+  // Leave (reset & stop camera)
   leaveBtn.addEventListener("click", () => {
     if(!confirm("Leave the practice meeting?")) return;
 
@@ -818,40 +811,23 @@
 
     meetingCard.style.display = "none";
     preJoinCard.style.display = "block";
-    syncButtons();
+    syncUI();
   });
-
-  // Hand raise
-  handBtn.addEventListener("click", () => {
-    handUp = !handUp;
-    syncButtons();
-  });
-
-  // Chat panel toggle
-  let chatOpen = true;
-  chatBtn.addEventListener("click", () => {
-    chatOpen = !chatOpen;
-    sidePanel.style.display = chatOpen ? "flex" : "none";
-  });
-
-  // Tabs
-  function setTab(tab){
-    const isChat = tab === "chat";
-    tabChat.classList.toggle("active", isChat);
-    tabTips.classList.toggle("active", !isChat);
-    chatBody.classList.toggle("hidden", !isChat);
-    tipsBody.classList.toggle("hidden", isChat);
-    chatInputRow.classList.toggle("hidden", !isChat);
-  }
-  tabChat.addEventListener("click", () => setTab("chat"));
-  tabTips.addEventListener("click", () => setTab("tips"));
 
   // Chat send (local only)
+  function escapeHtml(s){
+    return (s || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
   function addChatMessage(who, text){
     const wrap = document.createElement("div");
     wrap.className = "chatLine";
     const initials = who.trim().slice(0,1).toUpperCase() || "U";
-
     wrap.innerHTML = `
       <div class="who">
         <div class="avatar" style="width:26px;height:26px;font-size:12px;">${initials}</div>
@@ -863,15 +839,6 @@
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
-  function escapeHtml(s){
-    return (s || "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
   function sendChat(){
     const text = (chatInput.value || "").trim();
     if(!text) return;
@@ -880,6 +847,7 @@
     chatInput.value = "";
     chatInput.focus();
   }
+
   sendChatBtn.addEventListener("click", sendChat);
   chatInput.addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
@@ -888,9 +856,15 @@
     }
   });
 
-  // init (default off)
-  syncButtons();
-  setTab("chat");
+  // Placeholder buttons (practice only)
+  document.getElementById("presentBtn").addEventListener("click", () => showToast("Present is practice only"));
+  document.getElementById("ccBtn").addEventListener("click", () => showToast("Captions is practice only"));
+  document.getElementById("emojiBtn").addEventListener("click", () => showToast("Emoji is practice only"));
+  document.getElementById("btnMoreLeft").addEventListener("click", () => showToast("More options (practice)"));
+  document.getElementById("btnMoreRight").addEventListener("click", () => showToast("More (practice)"));
+
+  // init
+  syncUI();
   setVideoOn(false);
 </script>
 </body>
