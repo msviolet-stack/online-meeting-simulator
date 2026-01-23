@@ -18,7 +18,6 @@
       --shadow: 0 1px 2px rgba(0,0,0,.06), 0 10px 30px rgba(0,0,0,.10);
       --radius: 18px;
       --dark:#202124;
-      --dark2:#2b2c2f;
       --pillbg:#eef3fd;
       --pillline:#d7e3fd;
     }
@@ -83,7 +82,27 @@
       font-size: 14px;
     }
 
-    /* Layout containers */
+    /* Toast message (mic/cam on/off) */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(32,33,36,0.95);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: var(--shadow);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+      z-index: 9999;
+    }
+    .toast.show{ opacity: 1; }
+
+    /* Cards */
     .card{
       background: var(--card);
       border: 1px solid var(--line);
@@ -91,6 +110,8 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
+    /* Pre-join layout */
     .prejoin{
       display:grid;
       grid-template-columns: 1.3fr 1fr;
@@ -101,7 +122,7 @@
       .prejoin{ grid-template-columns: 1fr; }
     }
 
-    /* Preview box (camera area) */
+    /* Preview box */
     .preview{
       border-radius: 16px;
       background: var(--dark);
@@ -121,35 +142,7 @@
       text-align:center;
       padding: 18px;
     }
-    .preview .cornerBtn{
-      position:absolute;
-      left:14px;
-      bottom:14px;
-      width: 44px;
-      height: 44px;
-      border-radius: 999px;
-      border: 1px solid #3c4043;
-      background: rgba(255,255,255,0.08);
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      user-select:none;
-    }
-    .preview .cornerBtn:hover{ background: rgba(255,255,255,0.12); }
-    .preview .cornerBtn:active{ transform: translateY(1px); }
 
-    .preview .miniDots{
-      position:absolute;
-      right:10px;
-      bottom:10px;
-      width: 28px; height: 28px;
-      border-radius: 8px;
-      display:grid; place-items:center;
-      color:#cdd0d5;
-      user-select:none;
-    }
-
-    /* Pre-join controls under preview */
     .preControls{
       position:absolute;
       left:0; right:0;
@@ -158,10 +151,9 @@
       display:flex;
       justify-content:center;
       gap:12px;
-      pointer-events:none;
     }
+
     .roundBtn{
-      pointer-events:auto;
       width: 46px; height: 46px;
       border-radius: 999px;
       border: 1px solid #3c4043;
@@ -170,15 +162,28 @@
       place-items:center;
       cursor:pointer;
       user-select:none;
-      font-size: 16px;
+      font-size: 18px;
+      position: relative;
     }
     .roundBtn:hover{ background: rgba(255,255,255,0.14); }
+
+    /* "Off" state: red circle + slash overlay */
     .roundBtn.off{
       background: rgba(217,48,37,0.95);
       border-color: rgba(217,48,37,0.95);
     }
+    .slash{
+      position:absolute;
+      width: 30px;
+      height: 3px;
+      background: #fff;
+      transform: rotate(-35deg);
+      border-radius: 999px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.12);
+    }
+    .roundBtn:not(.off) .slash{ display:none; }
 
-    /* Right panel (join buttons/info) */
+    /* Right join panel */
     .joinPanel{
       border-radius: 16px;
       border: 1px solid var(--line);
@@ -186,14 +191,9 @@
       padding: 14px;
     }
     .meetingTitle{
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 900;
       margin: 2px 0 6px;
-    }
-    .smallMuted{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
     }
     .who{
       display:flex;
@@ -209,6 +209,11 @@
       display:grid; place-items:center;
       color:#1a73e8;
       font-weight:900;
+    }
+    .smallMuted{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
     }
     .btnRow{
       display:flex;
@@ -229,13 +234,6 @@
       font-weight: 900;
     }
     .btnPrimary:hover{ filter: brightness(0.95); }
-    .btnGhost{
-      background: transparent;
-      border: 1px solid var(--line);
-      color: var(--text);
-      font-weight: 700;
-    }
-    .btnGhost:hover{ background:#f3f6ff; }
 
     .input{
       width:100%;
@@ -251,9 +249,7 @@
     }
 
     /* Meeting screen */
-    .meeting{
-      display:none;
-    }
+    .meeting{ display:none; }
     .meetWrap{
       display:grid;
       grid-template-columns: 1fr 340px;
@@ -290,9 +286,6 @@
       background: var(--ok);
       border: 1px solid #0f6b2c;
     }
-    .stageTop .right{
-      display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-    }
 
     .gridTiles{
       display:grid;
@@ -305,7 +298,6 @@
     @media (max-width: 700px){
       .gridTiles{ grid-template-columns: 1fr; }
     }
-
     .tile{
       border-radius: 16px;
       background: var(--dark);
@@ -336,7 +328,6 @@
       font-size: 16px;
     }
 
-    /* Bottom controls */
     .meetControls{
       padding: 12px;
       border-top: 1px solid var(--line);
@@ -359,6 +350,7 @@
       cursor:pointer;
       user-select:none;
       font-size: 16px;
+      position: relative;
     }
     .controlBtn:hover{ background:#f3f6ff; }
     .controlBtn.off{
@@ -367,6 +359,9 @@
       color: var(--danger);
       font-weight: 900;
     }
+    .controlBtn.off .slash{ display:block; background: var(--danger); }
+    .controlBtn:not(.off) .slash{ display:none; }
+
     .hangup{
       background: var(--danger);
       border-color: var(--danger);
@@ -377,7 +372,7 @@
     }
     .hangup:hover{ filter: brightness(0.95); }
 
-    /* Side panel (chat + tips) */
+    /* Side panel */
     .side{
       border-radius: 16px;
       border: 1px solid var(--line);
@@ -461,7 +456,6 @@
       line-height: 1.35;
       margin-bottom: 10px;
     }
-
     .hidden{ display:none !important; }
   </style>
 </head>
@@ -490,24 +484,20 @@
         <div class="preview" aria-label="Camera preview">
           <div class="centerText" id="previewText">Camera is off</div>
 
-          <div class="cornerBtn" id="effectsBtn"
-               title="Effects: This is just for practice. It does not change the real camera.">
-            ✨
-          </div>
-
-          <div class="miniDots" title="More options (practice only)">⋮</div>
-
           <div class="preControls" aria-label="Pre-join controls">
-            <div class="roundBtn off" id="micBtn" title="Mic: Turn your microphone on or off.">🎤</div>
-            <div class="roundBtn off" id="camBtn" title="Camera: Turn your camera on or off.">📷</div>
+            <div class="roundBtn off" id="micBtn" title="Mic: Turn your microphone on or off.">
+              🎤
+              <span class="slash" aria-hidden="true"></span>
+            </div>
+            <div class="roundBtn off" id="camBtn" title="Camera: Turn your camera on or off.">
+              📷
+              <span class="slash" aria-hidden="true"></span>
+            </div>
           </div>
         </div>
 
         <div class="joinPanel">
           <div class="meetingTitle" id="meetingTitle">Class Online Meeting</div>
-          <div class="smallMuted">
-            This is a practice simulator. It will not connect to the internet.
-          </div>
 
           <div class="who">
             <div class="avatar" title="You">ME</div>
@@ -517,24 +507,18 @@
             </div>
           </div>
 
-          <div class="row" style="border-bottom:none; padding: 6px 0;">
-            <label for="nameInput" style="display:block;margin-bottom:6px;">Your display name (optional)</label>
-            <input class="input" id="nameInput" placeholder="e.g. Aisyah" />
+          <div style="padding: 6px 0;">
+            <label for="nameInput" style="display:block;margin-bottom:6px;color:var(--muted);font-size:14px;">
+              Your display name (optional)
+            </label>
+            <input class="input" id="nameInput" placeholder="e.g. 3A Sarah" />
+            <div class="smallMuted" style="margin-top:6px;">
+              Tip: For school meetings, include your class. Example: <strong>3A Sarah</strong>
+            </div>
           </div>
 
           <div class="btnRow">
             <button class="btn btnPrimary" id="joinBtn" title="Join: Enter the practice meeting room.">Join now</button>
-            <button class="btn btnGhost" id="presentBtn" title="Present: Practise sharing your screen (fake).">Present</button>
-          </div>
-
-          <div class="smallMuted">
-            <strong>Other options</strong><br>
-            • “Present” is only a practice button.<br>
-            • Mic/Camera buttons only change this simulator.
-          </div>
-
-          <div class="tipBox" style="margin-top:12px;">
-            <strong>Class rule:</strong> Start your meeting with “Good morning” and wait your turn to speak.
           </div>
         </div>
       </div>
@@ -576,8 +560,12 @@
 
           <div class="meetControls" aria-label="Meeting controls">
             <div class="controlGroup">
-              <div class="controlBtn off" id="inMicBtn" title="Mic: Turn your microphone on or off.">🎤</div>
-              <div class="controlBtn off" id="inCamBtn" title="Camera: Turn your camera on or off.">📷</div>
+              <div class="controlBtn off" id="inMicBtn" title="Mic: Turn your microphone on or off.">
+                🎤 <span class="slash" aria-hidden="true"></span>
+              </div>
+              <div class="controlBtn off" id="inCamBtn" title="Camera: Turn your camera on or off.">
+                📷 <span class="slash" aria-hidden="true"></span>
+              </div>
               <div class="controlBtn" id="handBtn" title="Raise hand: Show you want to speak.">✋</div>
               <div class="controlBtn" id="chatBtn" title="Chat: Open or close the chat panel.">💬</div>
             </div>
@@ -633,16 +621,28 @@
     </div>
   </div>
 
+  <!-- Toast -->
+  <div class="toast" id="toast">Microphone is on</div>
+
 <script>
   // ---------- State ----------
   let micOn = false;
   let camOn = false;
   let handUp = false;
 
+  const toast = document.getElementById("toast");
+  let toastTimer = null;
+
+  function showToast(text){
+    toast.textContent = text;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
+  }
+
   const previewText = document.getElementById("previewText");
   const micBtn = document.getElementById("micBtn");
   const camBtn = document.getElementById("camBtn");
-  const presentBtn = document.getElementById("presentBtn");
   const joinBtn = document.getElementById("joinBtn");
 
   const preJoinCard = document.getElementById("preJoinCard");
@@ -672,44 +672,38 @@
   const sendChatBtn = document.getElementById("sendChatBtn");
 
   function syncButtons(){
-    // Pre-join buttons
     micBtn.classList.toggle("off", !micOn);
     camBtn.classList.toggle("off", !camOn);
-
-    // In-meeting buttons
     inMicBtn.classList.toggle("off", !micOn);
     inCamBtn.classList.toggle("off", !camOn);
 
-    // Pills
     micStatePill.textContent = `Mic: ${micOn ? "On" : "Off"}`;
     camStatePill.textContent = `Camera: ${camOn ? "On" : "Off"}`;
 
-    // Preview + tile text
     previewText.textContent = camOn ? "Camera is on (practice)" : "Camera is off";
     youStatus.textContent = camOn ? "Camera is on (practice)" : "Camera is off";
 
-    // Hand
     handBtn.style.borderColor = handUp ? "#b6c9fb" : "var(--line)";
     handBtn.style.background = handUp ? "#eef3fd" : "#fff";
     handBtn.style.fontWeight = handUp ? "900" : "normal";
     handBtn.title = handUp ? "Lower hand" : "Raise hand: Show you want to speak.";
   }
 
-  function toggleMic(){ micOn = !micOn; syncButtons(); }
-  function toggleCam(){ camOn = !camOn; syncButtons(); }
+  function toggleMic(fromWhere){
+    micOn = !micOn;
+    syncButtons();
+    showToast(micOn ? "Microphone is on" : "Microphone is off");
+  }
+  function toggleCam(fromWhere){
+    camOn = !camOn;
+    syncButtons();
+    showToast(camOn ? "Camera is on" : "Camera is off");
+  }
 
   micBtn.addEventListener("click", toggleMic);
   camBtn.addEventListener("click", toggleCam);
   inMicBtn.addEventListener("click", toggleMic);
   inCamBtn.addEventListener("click", toggleCam);
-
-  presentBtn.addEventListener("click", () => {
-    alert("Present (practice): This would share your screen in a real meeting.");
-  });
-
-  document.getElementById("effectsBtn").addEventListener("click", () => {
-    alert("Effects (practice): In a real app, you could change your background.");
-  });
 
   // Join
   joinBtn.addEventListener("click", () => {
@@ -717,7 +711,6 @@
     const name = displayName.length ? displayName : "You";
     youNameChip.textContent = name;
 
-    // Meeting title can be changed later if you want. Keeping it simple.
     inMeetTitle.textContent = meetingTitle.textContent;
 
     preJoinCard.style.display = "none";
@@ -725,20 +718,13 @@
     syncButtons();
   });
 
-  // Leave
+  // Leave (reset to off for safety)
   leaveBtn.addEventListener("click", () => {
     if(!confirm("Leave the practice meeting?")) return;
-
-    // Reset meeting view
     handUp = false;
-
-    // Keep mic/cam state as-is OR reset? We'll reset to off for classroom safety.
     micOn = false;
     camOn = false;
-
-    // Clear chat input
     chatInput.value = "";
-
     meetingCard.style.display = "none";
     preJoinCard.style.display = "block";
     syncButtons();
@@ -750,7 +736,7 @@
     syncButtons();
   });
 
-  // Chat panel toggle (on small screens you might want this)
+  // Chat panel toggle
   let chatOpen = true;
   chatBtn.addEventListener("click", () => {
     chatOpen = !chatOpen;
