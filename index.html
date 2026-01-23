@@ -1,3 +1,4 @@
+<!doctype html> 
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -270,6 +271,7 @@
       padding: 12px;
       padding-bottom: 92px; /* space for bottom bar */
       position: relative;
+      align-items: stretch; /* keep columns aligned */
     }
     @media (max-width: 980px){
       .meetWrap{ grid-template-columns: 1fr; padding-bottom: 110px; }
@@ -312,6 +314,7 @@
       padding: 12px;
       background: #f7f9ff;
       flex: 1;
+      align-content: start; /* prevent weird stretching */
     }
     @media (max-width: 700px){
       .gridTiles{ grid-template-columns: 1fr; }
@@ -359,6 +362,25 @@
     }
     .tile.videoOn video{ display:block; }
     .tile.videoOn .status{ display:none; }
+
+    /* FIX 2: Host emoji placeholder */
+    .hostEmoji{
+      font-size: 70px;
+      line-height: 1;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    }
+    .hostStatusWrap{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+    .hostStatusWrap .small{
+      font-size: 14px;
+      color:#cdd0d5;
+      opacity: .95;
+    }
 
     /* Pin button on host tile */
     .pinBtn{
@@ -415,6 +437,7 @@
       padding: 10px 12px;
       flex: 1;
       overflow:auto;
+      min-height: 0; /* FIX: allow flex child to scroll instead of pushing height */
     }
     .chatLine{
       margin: 8px 0;
@@ -432,6 +455,8 @@
       align-items:center;
     }
     .chatLine .who span{ font-size: 12px; color: var(--muted); }
+
+    /* FIX 1: Prevent input row wrapping/growing when typing */
     .chatInputRow{
       padding: 10px 12px;
       border-top: 1px solid var(--line);
@@ -439,8 +464,15 @@
       gap:10px;
       align-items:center;
       background:#fff;
+      flex-wrap: nowrap; /* important */
+    }
+    .chatInputRow .input{
+      flex: 1 1 auto;   /* important */
+      width: auto;      /* override the 100% */
+      min-width: 0;     /* important for flex shrink */
     }
     .sendBtn{
+      flex: 0 0 auto;
       border:0;
       border-radius: 999px;
       padding: 10px 12px;
@@ -448,6 +480,7 @@
       color:#fff;
       font-weight:900;
       cursor:pointer;
+      white-space: nowrap;
     }
     .sendBtn:hover{ filter: brightness(0.95); }
 
@@ -637,7 +670,15 @@
             <!-- HOST -->
             <div class="tile" id="hostTile">
               <div class="pinBtn" id="pinHostBtn" title="Pin host: Make the host bigger on your screen.">📌</div>
-              <div class="status">Host (practice)</div>
+
+              <!-- FIX 2: Host shows teacher emoji instead of blank -->
+              <div class="status">
+                <div class="hostStatusWrap">
+                  <div class="hostEmoji">🧑🏼‍🏫</div>
+                  <div class="small">Host (practice)</div>
+                </div>
+              </div>
+
               <div class="name">Host</div>
             </div>
           </div>
