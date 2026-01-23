@@ -517,6 +517,34 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+
+    /* Emoji menu */
+    .menu{
+      position: fixed;
+      min-width: 190px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      z-index: 9999;
+    }
+    .emojiGrid{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .emojiBtn{
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor:pointer;
+      font-size: 18px;
+    }
+    .emojiBtn:hover{ background:#f3f6ff; }
   </style>
 </head>
 
@@ -660,7 +688,7 @@
               </svg>
             </div>
 
-            <div class="barBtn" id="emojiBtn" title="Emoji: Practice button.">
+            <div class="barBtn" id="emojiBtn" title="Emoji: Click to choose an emoji reaction.">
               😊
             </div>
 
@@ -672,7 +700,7 @@
               ✋
             </div>
 
-            <div class="barBtn moreDots" id="btnMoreRight" title="More: Practice button.">
+            <div class="barBtn moreDots" id="btnMoreRight" title="More: Click to see more options.">
               ⋮
             </div>
 
@@ -682,6 +710,18 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Emoji menu -->
+  <div class="menu" id="emojiMenu" aria-label="Emoji menu">
+    <div style="font-weight:900;margin:2px 2px 8px;">Choose an emoji</div>
+    <div class="emojiGrid">
+      <button class="emojiBtn" type="button" data-emoji="😊" title="Smile">😊</button>
+      <button class="emojiBtn" type="button" data-emoji="🤣" title="Laugh">🤣</button>
+      <button class="emojiBtn" type="button" data-emoji="🤩" title="Star eyes">🤩</button>
+      <button class="emojiBtn" type="button" data-emoji="😎" title="Cool">😎</button>
+      <button class="emojiBtn" type="button" data-emoji="😱" title="Surprised">😱</button>
     </div>
   </div>
 
@@ -701,14 +741,19 @@
   let unkindCount = 0;
   let chatBlockedUntil = 0; // timestamp in ms
 
-  // Simple unkind words list (you can edit this)
+  // Includes "shit" now
   const UNKIND_PATTERNS = [
     /\bstupid\b/i,
     /\bidiot\b/i,
     /\bdumb\b/i,
     /\bloser\b/i,
     /\bshut\s*up\b/i,
-    /\bi\s*hate\s*you\b/i
+    /\bi\s*hate\s*you\b/i,
+
+    // profanity (common)
+    /\bshit\b/i,
+    /\bshithead\b/i,
+    /\bcrap\b/i
   ];
 
   const toast = document.getElementById("toast");
@@ -753,6 +798,43 @@
   const gridTiles = document.getElementById("gridTiles");
   const pinHostBtn = document.getElementById("pinHostBtn");
   let hostPinned = false;
+
+  // Emoji menu
+  const emojiBtn = document.getElementById("emojiBtn");
+  const emojiMenu = document.getElementById("emojiMenu");
+
+  function hideEmojiMenu(){
+    emojiMenu.style.display = "none";
+  }
+  function openEmojiMenu(anchorEl){
+    const r = anchorEl.getBoundingClientRect();
+    emojiMenu.style.left = Math.round(r.left) + "px";
+    emojiMenu.style.top  = Math.round(r.top - 10 - emojiMenu.offsetHeight) + "px";
+
+    // If menu hasn't been measured yet, place below then correct next tick
+    emojiMenu.style.display = "block";
+    requestAnimationFrame(() => {
+      const rr = anchorEl.getBoundingClientRect();
+      emojiMenu.style.left = Math.round(rr.left) + "px";
+      emojiMenu.style.top  = Math.round(rr.top - 10 - emojiMenu.offsetHeight) + "px";
+    });
+  }
+
+  emojiBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if(emojiMenu.style.display === "block") hideEmojiMenu();
+    else openEmojiMenu(emojiBtn);
+  });
+  document.addEventListener("click", hideEmojiMenu);
+
+  emojiMenu.querySelectorAll("button[data-emoji]").forEach(b => {
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const emo = b.getAttribute("data-emoji");
+      showToast(`Reaction sent: ${emo} (practice only)`);
+      hideEmojiMenu();
+    });
+  });
 
   // Chat
   const chatBody = document.getElementById("chatBody");
@@ -860,8 +942,10 @@
   // Join
   joinBtn.addEventListener("click", () => {
     const displayName = (nameInput.value || "").trim();
-    const name = displayName.length ? displayName : "You";
-    youNameChip.textContent = name;
+
+    // show: You (3A Sarah)
+    const chipText = displayName.length ? `You (${displayName})` : "You";
+    youNameChip.textContent = chipText;
 
     inMeetTitle.textContent = meetingTitle.textContent;
 
@@ -873,6 +957,8 @@
   // Leave (reset & stop camera)
   leaveBtn.addEventListener("click", () => {
     if(!confirm("Leave the practice meeting?")) return;
+
+    hideEmojiMenu();
 
     hostPinned = false;
     gridTiles.classList.remove("pinned");
@@ -919,13 +1005,13 @@
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
-  function addSystemMessage(text){
+  function addSystemMessage(text, isStern=false){
     const wrap = document.createElement("div");
     wrap.className = "chatLine";
     wrap.innerHTML = `
       <div class="who">
-        <div class="avatar" style="width:26px;height:26px;font-size:12px;background:#fff6d6;border-color:#f0d27a;color:#5a4a12;">!</div>
-        <div><strong>Reminder</strong> <span>• just now</span></div>
+        <div class="avatar" style="width:26px;height:26px;font-size:12px;background:${isStern ? "#fce8e6" : "#fff6d6"};border-color:${isStern ? "#f28b82" : "#f0d27a"};color:${isStern ? "#a50e0e" : "#5a4a12"};">!</div>
+        <div><strong>${isStern ? "Warning" : "Reminder"}</strong> <span>• just now</span></div>
       </div>
       ${escapeHtml(text)}
     `;
@@ -943,20 +1029,19 @@
     if(unkindCount === 1){
       showToast("Reminder: Use kind words.");
       addSystemMessage("Please use kind words when engaging in conversations.");
-      return { allowSend: false };
+      return;
     }
 
     if(unkindCount === 2){
       showToast("Warning: Be respectful.");
-      addSystemMessage("⚠️ Warning: Unkind words are not allowed. Please be respectful.");
-      return { allowSend: false };
+      addSystemMessage("⚠️ Unkind words are not allowed. Please be respectful.", true);
+      return;
     }
 
     // 3rd time: block sending for 10 seconds
     chatBlockedUntil = Date.now() + 10000;
     showToast("Chat paused for 10 seconds.");
-    addSystemMessage("Chat is paused for 10 seconds. Please calm down and use respectful words.");
-    return { allowSend: false };
+    addSystemMessage("Chat is paused for 10 seconds. Please calm down and use respectful words.", true);
   }
 
   function sendChat(){
@@ -977,8 +1062,8 @@
       return;
     }
 
-    const name = (youNameChip.textContent || "You").trim();
-    addChatMessage(name, text);
+    const who = (youNameChip.textContent || "You").trim();
+    addChatMessage(who, text);
     chatInput.value = "";
     chatInput.focus();
   }
@@ -994,8 +1079,7 @@
   // Placeholder buttons (practice only)
   document.getElementById("presentBtn").addEventListener("click", () => showToast("Share screen is practice only"));
   document.getElementById("ccBtn").addEventListener("click", () => showToast("Captions is practice only"));
-  document.getElementById("emojiBtn").addEventListener("click", () => showToast("Emoji is practice only"));
-  document.getElementById("btnMoreRight").addEventListener("click", () => showToast("More options (practice)"));
+  document.getElementById("btnMoreRight").addEventListener("click", () => showToast("More options (not available for this practice)"));
 
   // init
   syncUI();
