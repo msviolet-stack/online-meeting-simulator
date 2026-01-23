@@ -141,7 +141,19 @@
       color: #e8eaed;
       text-align:center;
       padding: 18px;
+      z-index: 2;
     }
+    .preview video{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:none;
+      z-index: 1;
+    }
+    .preview.videoOn .centerText{ display:none; }
+    .preview.videoOn video{ display:block; }
 
     .preControls{
       position:absolute;
@@ -151,6 +163,7 @@
       display:flex;
       justify-content:center;
       gap:12px;
+      z-index: 3;
     }
 
     .roundBtn{
@@ -316,6 +329,7 @@
       border-radius: 999px;
       font-size: 13px;
       color:#e8eaed;
+      z-index: 3;
     }
     .tile .status{
       position:absolute;
@@ -326,7 +340,19 @@
       text-align:center;
       padding: 14px;
       font-size: 16px;
+      z-index: 2;
     }
+    .tile video{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:none;
+      z-index: 1;
+    }
+    .tile.videoOn video{ display:block; }
+    .tile.videoOn .status{ display:none; }
 
     .meetControls{
       padding: 12px;
@@ -475,13 +501,14 @@
     </div>
 
     <div class="warn">
-      <strong>🎯 Cyber Wellness Tip:</strong> Only join meetings you know and trust. Use polite words in chat.
+      <strong>🎯 Cyber Wellness Tip:</strong> Only join meetings you know and trust.
     </div>
 
     <!-- PRE-JOIN SCREEN -->
     <div class="card" id="preJoinCard">
       <div class="prejoin">
-        <div class="preview" aria-label="Camera preview">
+        <div class="preview" id="previewBox" aria-label="Camera preview">
+          <video id="previewVideo" playsinline autoplay muted></video>
           <div class="centerText" id="previewText">Camera is off</div>
 
           <div class="preControls" aria-label="Pre-join controls">
@@ -541,6 +568,7 @@
 
           <div class="gridTiles">
             <div class="tile" id="youTile">
+              <video id="tileVideo" playsinline autoplay muted></video>
               <div class="status" id="youStatus">Camera is off</div>
               <div class="name" id="youNameChip">You</div>
             </div>
@@ -630,15 +658,21 @@
   let camOn = false;
   let handUp = false;
 
+  // Camera stream (shared for preview + tile)
+  let camStream = null;
+
   const toast = document.getElementById("toast");
   let toastTimer = null;
-
   function showToast(text){
     toast.textContent = text;
     toast.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
   }
+
+  const previewBox = document.getElementById("previewBox");
+  const previewVideo = document.getElementById("previewVideo");
+  const tileVideo = document.getElementById("tileVideo");
 
   const previewText = document.getElementById("previewText");
   const micBtn = document.getElementById("micBtn");
@@ -671,6 +705,41 @@
   const chatInput = document.getElementById("chatInput");
   const sendChatBtn = document.getElementById("sendChatBtn");
 
+  function setVideoOn(on){
+    // preview styling
+    previewBox.classList.toggle("videoOn", on);
+    // meeting tile styling
+    document.getElementById("youTile").classList.toggle("videoOn", on);
+
+    previewText.textContent = on ? "" : "Camera is off";
+    youStatus.textContent = on ? "" : "Camera is off";
+  }
+
+  async function startCamera(){
+    if(camStream) return camStream;
+
+    // Request camera. (Audio not requested here.)
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+      audio: false
+    });
+
+    camStream = stream;
+    previewVideo.srcObject = stream;
+    tileVideo.srcObject = stream;
+    setVideoOn(true);
+    return stream;
+  }
+
+  function stopCamera(){
+    if(!camStream) return;
+    camStream.getTracks().forEach(t => t.stop());
+    camStream = null;
+    previewVideo.srcObject = null;
+    tileVideo.srcObject = null;
+    setVideoOn(false);
+  }
+
   function syncButtons(){
     micBtn.classList.toggle("off", !micOn);
     camBtn.classList.toggle("off", !camOn);
@@ -680,24 +749,41 @@
     micStatePill.textContent = `Mic: ${micOn ? "On" : "Off"}`;
     camStatePill.textContent = `Camera: ${camOn ? "On" : "Off"}`;
 
-    previewText.textContent = camOn ? "Camera is on (practice)" : "Camera is off";
-    youStatus.textContent = camOn ? "Camera is on (practice)" : "Camera is off";
-
     handBtn.style.borderColor = handUp ? "#b6c9fb" : "var(--line)";
     handBtn.style.background = handUp ? "#eef3fd" : "#fff";
     handBtn.style.fontWeight = handUp ? "900" : "normal";
     handBtn.title = handUp ? "Lower hand" : "Raise hand: Show you want to speak.";
   }
 
-  function toggleMic(fromWhere){
+  function toggleMic(){
     micOn = !micOn;
     syncButtons();
     showToast(micOn ? "Microphone is on" : "Microphone is off");
   }
-  function toggleCam(fromWhere){
-    camOn = !camOn;
+
+  async function toggleCam(){
+    // Turning ON
+    if(!camOn){
+      try{
+        await startCamera();
+        camOn = true;
+        syncButtons();
+        showToast("Camera is on");
+      }catch(err){
+        camOn = false;
+        syncButtons();
+        // Friendly message if blocked/denied
+        showToast("Camera permission was not allowed");
+        setVideoOn(false);
+      }
+      return;
+    }
+
+    // Turning OFF
+    camOn = false;
+    stopCamera();
     syncButtons();
-    showToast(camOn ? "Camera is on" : "Camera is off");
+    showToast("Camera is off");
   }
 
   micBtn.addEventListener("click", toggleMic);
@@ -718,13 +804,18 @@
     syncButtons();
   });
 
-  // Leave (reset to off for safety)
+  // Leave (reset to off for safety + stop camera)
   leaveBtn.addEventListener("click", () => {
     if(!confirm("Leave the practice meeting?")) return;
+
     handUp = false;
     micOn = false;
+
     camOn = false;
+    stopCamera();
+
     chatInput.value = "";
+
     meetingCard.style.display = "none";
     preJoinCard.style.display = "block";
     syncButtons();
@@ -797,9 +888,10 @@
     }
   });
 
-  // init
+  // init (default off)
   syncButtons();
   setTab("chat");
+  setVideoOn(false);
 </script>
 </body>
 </html>
