@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -363,7 +363,7 @@
     .tile.videoOn video{ display:block; }
     .tile.videoOn .status{ display:none; }
 
-    /* FIX 2: Host emoji placeholder */
+    /* Host emoji placeholder */
     .hostEmoji{
       font-size: 70px;
       line-height: 1;
@@ -437,7 +437,7 @@
       padding: 10px 12px;
       flex: 1;
       overflow:auto;
-      min-height: 0; /* FIX: allow flex child to scroll instead of pushing height */
+      min-height: 0;
     }
     .chatLine{
       margin: 8px 0;
@@ -456,7 +456,7 @@
     }
     .chatLine .who span{ font-size: 12px; color: var(--muted); }
 
-    /* FIX 1: Prevent input row wrapping/growing when typing */
+    /* Prevent input row wrapping/growing when typing */
     .chatInputRow{
       padding: 10px 12px;
       border-top: 1px solid var(--line);
@@ -464,12 +464,12 @@
       gap:10px;
       align-items:center;
       background:#fff;
-      flex-wrap: nowrap; /* important */
+      flex-wrap: nowrap;
     }
     .chatInputRow .input{
-      flex: 1 1 auto;   /* important */
-      width: auto;      /* override the 100% */
-      min-width: 0;     /* important for flex shrink */
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
     }
     .sendBtn{
       flex: 0 0 auto;
@@ -577,6 +577,15 @@
       font-size: 18px;
     }
     .emojiBtn:hover{ background:#f3f6ff; }
+
+    /* Credit footer (like your email simulator look) */
+    .credit{
+      text-align:center;
+      margin: 18px 0 6px;
+      font-size: 13px;
+      color: var(--muted);
+      opacity: 0.85;
+    }
   </style>
 </head>
 
@@ -671,7 +680,6 @@
             <div class="tile" id="hostTile">
               <div class="pinBtn" id="pinHostBtn" title="Pin host: Make the host bigger on your screen.">📌</div>
 
-              <!-- FIX 2: Host shows teacher emoji instead of blank -->
               <div class="status">
                 <div class="hostStatusWrap">
                   <div class="hostEmoji">🧑🏼‍🏫</div>
@@ -719,7 +727,6 @@
             </div>
 
             <div class="barBtn" id="presentBtn" title="Share screen: Practice button (no real sharing).">
-              <!-- monitor + arrow icon -->
               <svg class="presentIcon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="12" rx="2"></rect>
                 <path d="M12 16v4"></path>
@@ -750,6 +757,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- CREDIT (shows below the simulator like your email simulator) -->
+    <div class="credit">
+      Created by Ms Violet Soh; supported by OpenAI technology.
     </div>
   </div>
 
@@ -851,7 +863,6 @@
     emojiMenu.style.left = Math.round(r.left) + "px";
     emojiMenu.style.top  = Math.round(r.top - 10 - emojiMenu.offsetHeight) + "px";
 
-    // If menu hasn't been measured yet, place below then correct next tick
     emojiMenu.style.display = "block";
     requestAnimationFrame(() => {
       const rr = anchorEl.getBoundingClientRect();
@@ -983,7 +994,6 @@
   joinBtn.addEventListener("click", () => {
     const displayName = (nameInput.value || "").trim();
 
-    // show: You (3A Sarah)
     const chipText = displayName.length ? `You (${displayName})` : "You";
     youNameChip.textContent = chipText;
 
@@ -1078,7 +1088,6 @@
       return;
     }
 
-    // 3rd time: block sending for 10 seconds
     chatBlockedUntil = Date.now() + 10000;
     showToast("Chat paused for 10 seconds.");
     addSystemMessage("Chat is paused for 10 seconds. Please calm down and use respectful words.", true);
@@ -1095,7 +1104,6 @@
     const text = (chatInput.value || "").trim();
     if(!text) return;
 
-    // Kindness check
     if(containsUnkindWords(text)){
       chatInput.value = "";
       handleUnkindBehaviour();
