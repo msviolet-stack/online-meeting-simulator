@@ -271,7 +271,7 @@
       padding: 12px;
       padding-bottom: 92px; /* space for bottom bar */
       position: relative;
-      align-items: stretch; /* keep columns aligned */
+      align-items: stretch;
     }
     @media (max-width: 980px){
       .meetWrap{ grid-template-columns: 1fr; padding-bottom: 110px; }
@@ -314,7 +314,7 @@
       padding: 12px;
       background: #f7f9ff;
       flex: 1;
-      align-content: start; /* prevent weird stretching */
+      align-content: start;
     }
     @media (max-width: 700px){
       .gridTiles{ grid-template-columns: 1fr; }
@@ -578,7 +578,7 @@
     }
     .emojiBtn:hover{ background:#f3f6ff; }
 
-    /* Credit footer (like your email simulator look) */
+    /* Credit footer */
     .credit{
       text-align:center;
       margin: 18px 0 6px;
@@ -726,7 +726,9 @@
               📷 <span class="slash" aria-hidden="true"></span>
             </div>
 
-            <div class="barBtn" id="presentBtn" title="Share screen: Practice button (no real sharing).">
+            <!-- UPDATED TOOLTIP HERE -->
+            <div class="barBtn" id="presentBtn"
+                 title="Share screen: This function allows others to see the content on your screen (not available for this practice).">
               <svg class="presentIcon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="12" rx="2"></rect>
                 <path d="M12 16v4"></path>
@@ -739,9 +741,7 @@
               😊
             </div>
 
-            <div class="barBtn" id="ccBtn" title="Captions (CC): Practice button. Captions show words on screen.">
-              CC
-            </div>
+            <!-- CC BUTTON REMOVED -->
 
             <div class="barBtn" id="handBtn" title="Raise hand: Click if you want to speak.">
               ✋
@@ -759,7 +759,7 @@
       </div>
     </div>
 
-    <!-- CREDIT (shows below the simulator like your email simulator) -->
+    <!-- CREDIT -->
     <div class="credit">
       Created by Ms Violet Soh; supported by OpenAI technology.
     </div>
@@ -793,7 +793,6 @@
   let unkindCount = 0;
   let chatBlockedUntil = 0; // timestamp in ms
 
-  // Includes "shit" now
   const UNKIND_PATTERNS = [
     /\bstupid\b/i,
     /\bidiot\b/i,
@@ -801,8 +800,6 @@
     /\bloser\b/i,
     /\bshut\s*up\b/i,
     /\bi\s*hate\s*you\b/i,
-
-    // profanity (common)
     /\bshit\b/i,
     /\bshithead\b/i,
     /\bcrap\b/i
@@ -925,11 +922,9 @@
   }
 
   function syncUI(){
-    // Pre-join button styles
     micBtn.classList.toggle("off", !micOn);
     camBtn.classList.toggle("off", !camOn);
 
-    // In-meeting button styles
     inMicBtn.classList.toggle("off", !micOn);
     inCamBtn.classList.toggle("off", !camOn);
 
@@ -993,7 +988,6 @@
   // Join
   joinBtn.addEventListener("click", () => {
     const displayName = (nameInput.value || "").trim();
-
     const chipText = displayName.length ? `You (${displayName})` : "You";
     youNameChip.textContent = chipText;
 
@@ -1125,9 +1119,12 @@
   });
 
   // Placeholder buttons (practice only)
-  document.getElementById("presentBtn").addEventListener("click", () => showToast("Share screen is practice only"));
-  document.getElementById("ccBtn").addEventListener("click", () => showToast("Captions is practice only"));
-  document.getElementById("btnMoreRight").addEventListener("click", () => showToast("More options (not available for this practice)"));
+  document.getElementById("presentBtn").addEventListener("click", () =>
+    showToast("Share screen: others can see your screen (not available for this practice)")
+  );
+  document.getElementById("btnMoreRight").addEventListener("click", () =>
+    showToast("More options (not available for this practice)")
+  );
 
   // init
   syncUI();
