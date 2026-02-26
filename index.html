@@ -793,17 +793,43 @@
   let unkindCount = 0;
   let chatBlockedUntil = 0; // timestamp in ms
 
-  const UNKIND_PATTERNS = [
-    /\bstupid\b/i,
-    /\bidiot\b/i,
-    /\bdumb\b/i,
-    /\bloser\b/i,
-    /\bshut\s*up\b/i,
-    /\bi\s*hate\s*you\b/i,
-    /\bshit\b/i,
-    /\bshithead\b/i,
-    /\bcrap\b/i
-  ];
+  // Profanity / vulgarities (common)
+const UNKIND_PATTERNS = [
+  // insults / unkind phrases (you already have these)
+  /\bstupid\b/i,
+  /\bidiot\b/i,
+  /\bdumb\b/i,
+  /\bloser\b/i,
+  /\bshut\s*up\b/i,
+  /\bi\s*hate\s*you\b/i,
+
+  // profanity
+  /\bshit\b/i,
+  /\bshithead\b/i,
+  /\bcrap\b/i,
+
+  // add these
+  /\bfuck\b/i,
+  /\bfucking\b/i,
+  /\bfuck\s*you\b/i,
+  /\bfucker\b/i,
+
+  /\bwtf\b/i,
+
+  /\bbitch\b/i,
+  /\bson\s*of\s*a\s*bitch\b/i,
+
+  /\basshole\b/i,
+  /\bjackass\b/i,
+
+  /\bbastard\b/i,
+
+  /\bdamn\b/i,
+  /\bgod\s*damn\b/i,
+
+  // mild but common in student chat
+  /\bhell\b/i
+];
 
   const toast = document.getElementById("toast");
   let toastTimer = null;
